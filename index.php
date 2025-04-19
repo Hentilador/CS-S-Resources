@@ -3,26 +3,59 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CS:S Server Files</title>
+    <title>File Directory</title>
     <style>
-        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
-        h1 { color: #333; }
-        ul { list-style: none; padding: 0; }
-        li { margin: 10px 0; }
-        a { color: #0066cc; text-decoration: none; }
+        body { font-family: Arial, sans-serif; margin: 2rem; }
+        .file-list { list-style: none; padding: 0; }
+        .file-item { padding: 0.5rem; border-bottom: 1px solid #eee; }
+        .file-item:hover { background-color: #f8f9fa; }
+        .folder { color: #2c3e50; font-weight: bold; }
+        .file { color: #7f8c8d; }
+        a { color: inherit; text-decoration: none; }
         a:hover { text-decoration: underline; }
-        .dir::before { content: "📁 "; }
-        .file::before { content: "📄 "; }
+        .icon { margin-right: 0.5rem; }
     </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
-    <h1>CS:S Server Files</h1>
-    <p>Manually listed files/folders:</p>
-    <ul>
-        <!-- Manually add your folders/files here -->
-        <li><a href="/maps/" class="dir">maps/</a></li>
-        <li><a href="/netlify.toml" class="file">netlify.toml</a></li>
+    <h1>Directory Listing</h1>
+    <ul class="file-list">
+        <?php
+        // Get current directory contents
+        $files = scandir(__DIR__);
+        $folders = [];
+        $normalFiles = [];
+
+        foreach ($files as $file) {
+            if ($file === '.' || $file === '..' || $file === basename(__FILE__)) continue;
+            
+            if (is_dir($file)) {
+                $folders[] = $file;
+            } else {
+                $normalFiles[] = $file;
+            }
+        }
+
+        // Sort arrays
+        sort($folders);
+        sort($normalFiles);
+
+        // Display folders first
+        foreach ($folders as $item) {
+            echo '<li class="file-item folder">';
+            echo '<i class="icon fas fa-folder"></i>';
+            echo htmlspecialchars($item);
+            echo '</li>';
+        }
+
+        // Display files
+        foreach ($normalFiles as $item) {
+            echo '<li class="file-item file">';
+            echo '<i class="icon fas fa-file"></i>';
+            echo '<a href="' . htmlspecialchars($item) . '">' . htmlspecialchars($item) . '</a>';
+            echo '</li>';
+        }
+        ?>
     </ul>
-    <p>Test map download: <a href="/maps/de_dust2.bsp">de_dust2.bsp</a></p>
 </body>
 </html>
