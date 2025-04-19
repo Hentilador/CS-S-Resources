@@ -3,10 +3,3 @@
   [headers.values]
     Content-Type = "application/octet-stream"
     Cache-Control = "public, max-age=3600"
-
-[build]
-  command = "./build.sh"
-  publish = "./"
-
-[build.environment]
-  PHP_VERSION = "8.2"
