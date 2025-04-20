@@ -122,7 +122,7 @@
 
         foreach ($allFiles as $file) {
             echo '<li class="file-item">';
-            echo '<a href="'.htmlspecialchars($file['path']).'">';
+            echo '<a href="https://cultstrike.netlify.app/'.htmlspecialchars($file['path']).'">';
             echo '<span class="folder-label">'.htmlspecialchars($file['folder']).'</span>';
             echo '<span class="file-icon">📄</span>';
             echo htmlspecialchars($file['name']);
