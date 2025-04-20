@@ -1,5 +1,8 @@
+[build]
+  ignore = "/*"
+
 [[headers]]
   for = "/*"
   [headers.values]
-    Content-Type = "application/octet-stream"
-    Cache-Control = "public, max-age=3600"
+    Cache-Control = "public, max-age=31536000, immutable"
+    Access-Control-Allow-Origin = "*"
