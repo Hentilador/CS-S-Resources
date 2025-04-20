@@ -3,57 +3,74 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>File Directory</title>
+    <title>Project Files</title>
     <style>
         body { font-family: Arial, sans-serif; margin: 2rem; }
         .file-list { list-style: none; padding: 0; }
         .file-item { padding: 0.5rem; border-bottom: 1px solid #eee; }
-        .file-item:hover { background-color: #f8f9fa; }
-        .folder { color: #2c3e50; font-weight: bold; }
-        .file { color: #7f8c8d; }
-        a { color: inherit; text-decoration: none; }
+        .folder-label { 
+            display: inline-block;
+            background: #f0f0f0;
+            padding: 2px 8px;
+            border-radius: 4px;
+            margin-right: 1rem;
+            font-size: 0.9em;
+        }
+        a { color: #2c3e50; text-decoration: none; }
         a:hover { text-decoration: underline; }
-        .icon { margin-right: 0.5rem; }
     </style>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
-    <h1>Directory Listing</h1>
+    <h1>Project File Structure</h1>
     <ul class="file-list">
         <?php
-        // Get current directory contents
-        $files = scandir(__DIR__);
-        $folders = [];
-        $normalFiles = [];
+        function scanRecursively($dir, $root) {
+            $files = [];
+            $iterator = new RecursiveIteratorIterator(
+                new RecursiveDirectoryIterator(
+                    $dir, 
+                    FilesystemIterator::SKIP_DOTS | FilesystemIterator::UNIX_PATHS
+                ),
+                RecursiveIteratorIterator::SELF_FIRST
+            );
 
-        foreach ($files as $file) {
-            if ($file === '.' || $file === '..' || $file === basename(__FILE__)) continue;
-            
-            if (is_dir($file)) {
-                $folders[] = $file;
-            } else {
-                $normalFiles[] = $file;
+            foreach ($iterator as $file) {
+                $relativePath = substr($file->getPathname(), strlen($root) + 1);
+                
+                // Skip hidden directories and their contents
+                if ($file->isDir() && strpos($file->getFilename(), '.') === 0) {
+                    $iterator->next();
+                    continue;
+                }
+                
+                // Skip root files and hidden files
+                if ($file->isFile() && 
+                    strpos($relativePath, '/') !== false && 
+                    strpos(basename($relativePath), '.') !== 0
+                ) {
+                    $folder = dirname($relativePath);
+                    $files[] = [
+                        'folder' => $folder,
+                        'name' => $file->getFilename(),
+                        'path' => $relativePath
+                    ];
+                }
             }
+            return $files;
         }
 
-        // Sort arrays
-        sort($folders);
-        sort($normalFiles);
+        $root = __DIR__;
+        $allFiles = scanRecursively($root, $root);
+        usort($allFiles, function($a, $b) {
+            return strcmp($a['folder'].$a['name'], $b['folder'].$b['name']);
+        });
 
-        // Display folders first
-        foreach ($folders as $item) {
-            echo '<li class="file-item folder">';
-            echo '<i class="icon fas fa-folder"></i>';
-            echo htmlspecialchars($item);
-            echo '</li>';
-        }
-
-        // Display files
-        foreach ($normalFiles as $item) {
-            echo '<li class="file-item file">';
-            echo '<i class="icon fas fa-file"></i>';
-            echo '<a href="' . htmlspecialchars($item) . '">' . htmlspecialchars($item) . '</a>';
-            echo '</li>';
+        foreach ($allFiles as $file) {
+            echo '<li class="file-item">';
+            echo '<span class="folder-label">'.htmlspecialchars($file['folder']).'</span>';
+            echo '<a href="'.htmlspecialchars($file['path']).'">';
+            echo htmlspecialchars($file['name']);
+            echo '</a></li>';
         }
         ?>
     </ul>
